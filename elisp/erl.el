@@ -263,26 +263,6 @@ Also makes the current process immediately reschedulable."
   ;; the scheduler loop will catch this and know what to do
   (throw 'schedule-out 'reschedule))
 
-(defun erl-idle ()
-  (erl-receive ()
-      ()))
-
-(defun erl-make-ref ()
-  "Make a unique reference object."
-  (vector erl-tag 'erl-ref erl-node-name (incf erl-ref-counter) 0))
-
-(defun erl-binaryp (x)
-  (and (eq (elt x 0) erl-tag) (eq (elt x 1) 'erl-binary)))
-
-(defun erl-binary-string (x)
-  (elt x 2))
-
-(defun erl-binary (string)
-  (vector erl-tag 'erl-binary string))
-
-;; receive
-
-
 (defmacro erl-receive (vars clauses &rest after)
   "Receive a message, matched by pattern.
 If the mailbox contains a matching message, the pattern's body is
@@ -311,6 +291,27 @@ The pattern syntax is the same as `mcase-let'."
   `(erl-start-receive (capture-bindings ,@vars)
                         ,(mcase-parse-clauses clauses)
                         (lambda () ,@after)))
+
+
+(defun erl-idle ()
+  (erl-receive ()
+      ()))
+
+(defun erl-make-ref ()
+  "Make a unique reference object."
+  (vector erl-tag 'erl-ref erl-node-name (incf erl-ref-counter) 0))
+
+(defun erl-binaryp (x)
+  (and (eq (elt x 0) erl-tag) (eq (elt x 1) 'erl-binary)))
+
+(defun erl-binary-string (x)
+  (elt x 2))
+
+(defun erl-binary (string)
+  (vector erl-tag 'erl-binary string))
+
+;; receive
+
 
 (defun erl-start-receive (bs clauses after)
   ;; Setup a continuation and immediately return to the scheduler
